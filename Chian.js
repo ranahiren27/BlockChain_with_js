@@ -6,16 +6,29 @@ class Block{
 		this.data = data;
 		this.previousHash = previousHash;
 		this.hash = this.calculateHash();
+		this.nonce = 0;
 	}
 
 	calculateHash(){
-		return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
+		return SHA256(this.nonce + this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
+	} 
+
+	mineBlock(difficulty){
+		//proof of work
+		while(this.hash.substring(0,difficulty) !== Array(difficulty+1).join("0")){
+			this.hash = this.calculateHash();
+			this.nonce++;
+		}
+
+		console.log("Block mined: " + this.hash);
+	
 	}
 }
 
 class Bloackchain{
 	constructor(){
 		this.chain = [this.createGenesisBlock()];
+		this.difficulty = 5;
 	}
 
 	createGenesisBlock(){
@@ -28,7 +41,7 @@ class Bloackchain{
 
 	addBlock(newBlock){
 		newBlock.previousHash = this.getLatestBlock().hash;
-		newBlock.hash = newBlock.calculateHash();
+		newBlock.mineBlock(this.difficulty);
 		this.chain.push(newBlock);
 	}
 
@@ -57,17 +70,14 @@ class Bloackchain{
 
 
 let ranaCoin = new Bloackchain();
+console.log("Mining block 1....");
 ranaCoin.addBlock(new Block(1,"11/01/2018",{amount: 23}));
+console.log("Mining block 2....");
 ranaCoin.addBlock(new Block(2,"12/01/2018",{amount: 243}));
+console.log("Mining block 3....");
 ranaCoin.addBlock(new Block(3,"13/01/2018",{amount: 3}));
+console.log("Mining block 4....");
 ranaCoin.addBlock(new Block(4,"14/01/2018",{amount: 2}));
+console.log("Mining block 5....");
 ranaCoin.addBlock(new Block(5,"15/01/2018",{amount: 230}));
 
-//console.log(JSON.stringify(ranaCoin, null, 5)); 
-
-console.log("is BlockChian valid? "+ranaCoin.isChainValid());
-console.log("After chaging hashh\n");
-ranaCoin.chain[1].data = {amount: 2000};
-ranaCoin.chain[1].hash = ranaCoin.chain[1].calculateHash();
-ranaCoin.chain[2].previousHash = ranaCoin.chain[1].hash;
-console.log("is BlockChian valid? "+ranaCoin.isChainValid());
